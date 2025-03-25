@@ -220,3 +220,21 @@ def translate_to_en(texts:list[str]):
             #print(text)
             #print(text_en)
     return text_en_l
+
+# Function to build chained labels for multi-output classification
+def build_chained_labels(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Build chained labels for multi-output classification.
+    - y_chain1: Type2 (first stage)
+    - y_chain2: Type2 + Type3 (first two stages)
+    - y_chain3: Type2 + Type3 + Type4 (full chain)
+    For training, we use 'y_chain' (same as y_chain3).
+    This function drops rows where y2, y3, or y4 are missing.
+    """
+    df = df.copy()  # Avoid SettingWithCopyWarning
+    df = df.dropna(subset=["y2", "y3", "y4"])
+    df["y_chain1"] = df["y2"].astype(str)
+    df["y_chain2"] = df["y2"].astype(str) + "+" + df["y3"].astype(str)
+    df["y_chain3"] = df["y2"].astype(str) + "+" + df["y3"].astype(str) + "+" + df["y4"].astype(str)
+    df["y_chain"]  = df["y_chain3"]
+    return df
