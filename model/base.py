@@ -30,8 +30,9 @@ class BaseModel(ABC):
         return
 
     # def build(self, values) -> BaseModel:
+    # def build(self, values) -> BaseModel:
     def build(self, values={}):
-        values = values if isinstance(values, dict) else utils.string2any(values)
+        values = values if isinstance(values, dict) else eval(values)
         self.__dict__.update(self.defaults)
         self.__dict__.update(values)
         return self

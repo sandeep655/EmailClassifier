@@ -49,11 +49,6 @@ if __name__ == '__main__':
     for name, group_df in grouped_df:
         print("Processing group:", name)
         X = get_tfidf_embd(group_df)
-        data = Data(X, group_df)  # Data object now contains chained labels.
-        from model.randomforest import RandomForest
-        # In chained mode, pass y_chain_train as the training target.
-        model = RandomForest("RandomForest", data.get_embeddings(),
-                             data.y_chain_train if hasattr(data, 'y_chain_train') else None)
-        model.train(data)
-        model.predict(data.X_test)
-        model.print_results(data)
+        data = get_data_object(X, group_df) # Data object now contains chained labels.  
+        perform_modelling(data, group_df, name)
+        print("Completed processing group:", name)
