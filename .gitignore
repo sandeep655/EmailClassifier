@@ -1,0 +1,10 @@
+# Python cache
+__pycache__/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# OS/IDE
+.DS_Store
+.idea/
+.vscode/
