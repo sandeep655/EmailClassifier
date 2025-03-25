@@ -35,12 +35,25 @@ def perform_modelling(data: Data, df: pd.DataFrame, name):
 if __name__ == '__main__':
     df = load_data()
     df = preprocess_data(df)
-    df[Config.INTERACTION_CONTENT] = df[Config.INTERACTION_CONTENT].values.astype('U')
-    df[Config.TICKET_SUMMARY] = df[Config.TICKET_SUMMARY].values.astype('U')
+    
+    # Build chained labels for multi-output chained classification.
+    from preprocess import build_chained_labels
+    df = build_chained_labels(df)
+    
+    # Ensure text columns have proper type.
+    df[Config.INTERACTION_CONTENT] = df[Config.INTERACTION_CONTENT].astype('U')
+    df[Config.TICKET_SUMMARY] = df[Config.TICKET_SUMMARY].astype('U')
+    
+    # Group by the column defined in Config (usually y1).
     grouped_df = df.groupby(Config.GROUPED)
     for name, group_df in grouped_df:
-        print(name)
-        X, group_df = get_embeddings(group_df)
-        data = get_data_object(X, group_df)
-        perform_modelling(data, group_df, name)
-
+        print("Processing group:", name)
+        X = get_tfidf_embd(group_df)
+        data = Data(X, group_df)  # Data object now contains chained labels.
+        from model.randomforest import RandomForest
+        # In chained mode, pass y_chain_train as the training target.
+        model = RandomForest("RandomForest", data.get_embeddings(),
+                             data.y_chain_train if hasattr(data, 'y_chain_train') else None)
+        model.train(data)
+        model.predict(data.X_test)
+        model.print_results(data)
